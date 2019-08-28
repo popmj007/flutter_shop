@@ -24,7 +24,11 @@ class _CategoryPageState extends State<CategoryPage>{
       body: Row(
         children: <Widget>[
           LeftCategoryNav(),
-
+          Column(
+            children: <Widget>[
+              RightCategoryNav()
+            ],
+          )
         ],
 
       ),
@@ -98,6 +102,58 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
           )
         ),
         child: Text(mlist[index].mallCategoryName,style: TextStyle(fontSize: ScreenUtil().setSp(28)),),
+      ),
+    );
+  }
+
+}
+
+class RightCategoryNav extends StatefulWidget{
+
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return new _RightCategoryNavState();
+  }
+
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav>{
+
+  List list = ['名酒',"宝丰","北京二锅头"];
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Container(
+      height: ScreenUtil().setHeight(80),
+      width: ScreenUtil().setWidth(570),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(width: 1,color:Colors.black12)
+        )
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: list.length,
+        itemBuilder: (context,index){
+          return _rightInkWell(list[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _rightInkWell(String item){
+    return InkWell(
+      onTap: (){},
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
+        child: Text(
+          item,
+          style: TextStyle(fontSize: ScreenUtil().setSp(28),inherit: true),
+        ),
       ),
     );
   }
