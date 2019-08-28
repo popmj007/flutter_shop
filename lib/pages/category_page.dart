@@ -53,7 +53,8 @@ class LeftCategoryNav extends StatefulWidget{
 class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
   List mlist = [];
-  var listIndex = 0;//索引
+  var listIndex = 0;//大类索引
+
   @override
   void initState() {
     // TODO: implement initState
@@ -104,6 +105,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
         setState(() {
           listIndex = index;
+          smallCategoryIndex = 0;
         });
 
         var childList = mlist[index].bxMallSubDto;
@@ -136,8 +138,11 @@ class RightCategoryNav extends StatefulWidget{
   }
 
 }
-
+var smallCategoryIndex = 0;//小类索引
 class _RightCategoryNavState extends State<RightCategoryNav>{
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +162,7 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
             child:ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context,index){
-                  return _rightInkWell(childCategory.childCategoryList[index]);
+                  return _rightInkWell(childCategory.childCategoryList[index],index);
                 },
                 itemCount: childCategory.childCategoryList.length,
             ),
@@ -167,12 +172,20 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
     );
   }
 
-  Widget _rightInkWell(BxMallSubDto item){
+  Widget _rightInkWell(BxMallSubDto item,int index){
+    bool isClick = false;
+    isClick = (smallCategoryIndex == index)?true:false;
+
     return InkWell(
       onTap: (){
-
+        setState(() {
+          smallCategoryIndex = index;
+        });
       },
       child: Container(
+        decoration: BoxDecoration(
+          color: isClick?Colors.pink[50]:Colors.white
+        ),
         height: ScreenUtil().setHeight(100),
         padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
         child: Text(
