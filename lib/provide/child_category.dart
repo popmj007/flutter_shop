@@ -6,6 +6,7 @@ class ChildCategory with ChangeNotifier{
 
   getChildCategory(List list){
     childCategoryList = list;
+    print("yxl=============>"+childCategoryList.length.toString());
     notifyListeners();
   }
 }

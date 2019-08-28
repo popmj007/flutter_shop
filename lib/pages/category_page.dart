@@ -53,7 +53,7 @@ class LeftCategoryNav extends StatefulWidget{
 class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
   List mlist = [];
-
+  var listIndex = 0;//索引
   @override
   void initState() {
     // TODO: implement initState
@@ -88,12 +88,24 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
       setState(() {
         mlist = categoryModel.data;
       });
+
+      //一级菜单默认选中第一项,所以先获取二级分类菜单数据
+      Provide.value<ChildCategory>(context).getChildCategory(mlist[0].bxMallSubDto);
     });
   }
 
   Widget _leftInkWell(int index){
+
+    bool isClick = false;
+    isClick = (index == listIndex)?true:false;
+
     return InkWell(
       onTap: (){
+
+        setState(() {
+          listIndex = index;
+        });
+
         var childList = mlist[index].bxMallSubDto;
         Provide.value<ChildCategory>(context).getChildCategory(childList);
       },
@@ -102,7 +114,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
         padding: EdgeInsets.only(left: 10,top: 20),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isClick?Colors.black12:Colors.white,
           border: Border(
             bottom: BorderSide(width: 1,color: Colors.black12)
           )
@@ -143,6 +155,7 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
               )
             ),
             child:ListView.builder(
+                scrollDirection: Axis.horizontal,
                 itemBuilder: (context,index){
                   return _rightInkWell(childCategory.childCategoryList[index]);
                 },
@@ -160,6 +173,7 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
 
       },
       child: Container(
+        height: ScreenUtil().setHeight(100),
         padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
         child: Text(
           item.mallSubName,
