@@ -2,14 +2,17 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/pages/index_page.dart';
+import 'package:flutter_shop/provide/child_category.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/provide/counter.dart';
 
 
 void main(){
-  var counter = Counter();
   var providers = Providers();
-  providers.provide(Provider<Counter>.value(counter));
+  var childCategory = ChildCategory();
+  var counter = Counter();
+  providers..provide(Provider<ChildCategory>.value(childCategory))
+  ..provide(Provider<Counter>.value(counter));
   runApp(ProviderNode(child: MyApp(), providers: providers));
 }
 
