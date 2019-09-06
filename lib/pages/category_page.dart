@@ -267,16 +267,19 @@ class _CategoryGoodsListState extends State<CategoryGoodsList>{
     // TODO: implement build
     return Provide<CategoryGoodsListProvide>(
       builder: (context,child,data){
-        return Container(
-          width: ScreenUtil().setWidth(570),
-          height: ScreenUtil().setHeight(986),
-          child: ListView.builder(
-            itemCount: data.goodsList.length,
-              itemBuilder: (context,index){
-                return _ListWidget(data.goodsList, index);
-              }
-          ),
+        return Expanded(
+            child:  Container(
+              width: ScreenUtil().setWidth(570),
+//              height: ScreenUtil().setHeight(986), 使用Expanded Widget,可以使子widget具有伸缩的能力
+              child: ListView.builder(
+                  itemCount: data.goodsList.length,
+                  itemBuilder: (context,index){
+                    return _ListWidget(data.goodsList, index);
+                  }
+              ),
+            )
         );
+
       },
     );
   }
