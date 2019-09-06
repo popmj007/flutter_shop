@@ -56,6 +56,12 @@ class LeftCategoryNav extends StatefulWidget{
 
 
 }
+
+var mChildList;//二级分类集合
+var mCategoryId;//大类分类的id
+var mCategorySubId;//小类分类的id
+var smallCategoryIndex = 0;//小类索引
+
 class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
   List mlist = [];//大类分类集合
@@ -80,14 +86,57 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
       //一级菜单默认[选中第一项],所以先获取二级分类菜单数据
       Provide.value<ChildCategory>(context).getChildCategory(mlist[0].bxMallSubDto);
 
-      _getGoodList(categoryId:mlist[0].mallCategoryId);//不知道二级分类全部的传参，暂时先传二级分类的第一种分类
+      _getGoodList(categoryId:mlist[0].mallCategoryId,categorySubId: "");//先拉取第一个大类，第二个小类的全部商品列表
     });
   }
 
-  void _getGoodList({String categoryId})async{
+  Widget _leftInkWell(int index){
+
+    bool isClick = false;
+    isClick = (index == listIndex)?true:false;
+
+    return InkWell(
+      onTap: (){
+        setState(() {
+          //选择的不同 子类加载全部；选择相同 子类不做改变
+          if(listIndex!=index){
+            _getGoodList(categoryId:mCategoryId,categorySubId: "");
+            smallCategoryIndex = 0;
+          }else{
+            _getGoodList(categoryId:mCategoryId,categorySubId: mCategorySubId);
+          }
+          listIndex = index;
+
+          mChildList = mlist[index].bxMallSubDto;//通过点击的大类索引获取二级分类集合
+          mCategoryId = mlist[index].mallCategoryId;
+
+        });
+
+
+
+        Provide.value<ChildCategory>(context).getChildCategory(mChildList);//状态管理给二级分类集合赋值
+
+
+      },
+      child: Container(
+        height: ScreenUtil().setHeight(100),
+        padding: EdgeInsets.only(left: 10,top: 20),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isClick?Colors.black12:Colors.white,
+          border: Border(
+            bottom: BorderSide(width: 1,color: Colors.black12)
+          )
+        ),
+        child: Text(mlist[index].mallCategoryName,style: TextStyle(fontSize: ScreenUtil().setSp(28)),),
+      ),
+    );
+  }
+
+  void _getGoodList({String categoryId,String categorySubId})async{
     var data={
       'categoryId':categoryId==null?'4':categoryId,
-      'categorySubId':"",
+      'categorySubId':categorySubId==null?'':categorySubId,
       'page':1
     };
     await request('getMallGoods',formData: data).then((val){
@@ -96,6 +145,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
       Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -116,39 +166,6 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
     );
   }
 
-
-  Widget _leftInkWell(int index){
-
-    bool isClick = false;
-    isClick = (index == listIndex)?true:false;
-
-    return InkWell(
-      onTap: (){
-        setState(() {
-          listIndex = index;
-          smallCategoryIndex = 0;
-        });
-
-        var childList = mlist[index].bxMallSubDto;//通过点击的大类索引获取二级分类集合
-        var categoryId = mlist[index].mallCategoryId;
-        Provide.value<ChildCategory>(context).getChildCategory(childList);//状态管理给二级分类集合赋值
-        _getGoodList(categoryId:categoryId);
-      },
-      child: Container(
-        height: ScreenUtil().setHeight(100),
-        padding: EdgeInsets.only(left: 10,top: 20),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isClick?Colors.black12:Colors.white,
-          border: Border(
-            bottom: BorderSide(width: 1,color: Colors.black12)
-          )
-        ),
-        child: Text(mlist[index].mallCategoryName,style: TextStyle(fontSize: ScreenUtil().setSp(28)),),
-      ),
-    );
-  }
-
 }
 
 class RightCategoryNav extends StatefulWidget{
@@ -162,7 +179,6 @@ class RightCategoryNav extends StatefulWidget{
 
 }
 
-var smallCategoryIndex = 0;//小类索引
 
 class _RightCategoryNavState extends State<RightCategoryNav>{
 
@@ -193,6 +209,19 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
       );
   }
 
+  void _getGoodList({String categoryId,String categorySubId})async{
+    var data={
+      'categoryId':categoryId==null?'4':categoryId,
+      'categorySubId':categorySubId==null?'':categorySubId,
+      'page':1
+    };
+    await request('getMallGoods',formData: data).then((val){
+      var data = json.decode(val.toString());
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+    });
+  }
+
   Widget _rightInkWell(BxMallSubDto item,int index){
     bool isClick = false;
     isClick = (smallCategoryIndex == index)?true:false;
@@ -201,7 +230,9 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
       onTap: (){
         setState(() {
           smallCategoryIndex = index;
+          mCategorySubId = item.mallSubId;
         });
+        _getGoodList(categoryId:mCategoryId,categorySubId: mCategorySubId);
       },
       child: Container(
         decoration: BoxDecoration(
