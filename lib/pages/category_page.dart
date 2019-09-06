@@ -7,6 +7,7 @@ import 'package:flutter_shop/service/service_method.dart';
 import 'package:flutter_shop/model/CategoryBigModel.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/model/CategoryGoodsListModel.dart';
+import '../provide/category_goods_list.dart';
 
 class CategoryPage extends StatefulWidget{
 
@@ -18,6 +19,8 @@ class CategoryPage extends StatefulWidget{
 
 
 }
+
+
 
 class _CategoryPageState extends State<CategoryPage>{
   @override
@@ -55,7 +58,7 @@ class LeftCategoryNav extends StatefulWidget{
 }
 class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
-  List mlist = [];
+  List mlist = [];//大类分类集合
   var listIndex = 0;//大类索引
 
   @override
@@ -63,6 +66,35 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
     // TODO: implement initState
     _getCategory();
     super.initState();
+  }
+
+  void _getCategory() async{
+    await request('getCategory').then((val){
+      var data = json.decode(val.toString());
+      CategoryModel categoryModel = CategoryModel.fromJson(data);
+      categoryModel.data.forEach((item)=>print(item.mallCategoryName));
+      setState(() {
+        mlist = categoryModel.data;
+      });
+
+      //一级菜单默认[选中第一项],所以先获取二级分类菜单数据
+      Provide.value<ChildCategory>(context).getChildCategory(mlist[0].bxMallSubDto);
+
+      _getGoodList(categoryId:mlist[0].mallCategoryId);//不知道二级分类全部的传参，暂时先传二级分类的第一种分类
+    });
+  }
+
+  void _getGoodList({String categoryId})async{
+    var data={
+      'categoryId':categoryId==null?'4':categoryId,
+      'categorySubId':"",
+      'page':1
+    };
+    await request('getMallGoods',formData: data).then((val){
+      var data = json.decode(val.toString());
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+    });
   }
 
   @override
@@ -84,19 +116,6 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
     );
   }
 
-  void _getCategory() async{
-    await request('getCategory').then((val){
-      var data = json.decode(val.toString());
-      CategoryModel categoryModel = CategoryModel.fromJson(data);
-      categoryModel.data.forEach((item)=>print(item.mallCategoryName));
-      setState(() {
-        mlist = categoryModel.data;
-      });
-
-      //一级菜单默认选中第一项,所以先获取二级分类菜单数据
-      Provide.value<ChildCategory>(context).getChildCategory(mlist[0].bxMallSubDto);
-    });
-  }
 
   Widget _leftInkWell(int index){
 
@@ -105,14 +124,15 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
     return InkWell(
       onTap: (){
-
         setState(() {
           listIndex = index;
           smallCategoryIndex = 0;
         });
 
-        var childList = mlist[index].bxMallSubDto;
-        Provide.value<ChildCategory>(context).getChildCategory(childList);
+        var childList = mlist[index].bxMallSubDto;//通过点击的大类索引获取二级分类集合
+        var categoryId = mlist[index].mallCategoryId;
+        Provide.value<ChildCategory>(context).getChildCategory(childList);//状态管理给二级分类集合赋值
+        _getGoodList(categoryId:categoryId);
       },
       child: Container(
         height: ScreenUtil().setHeight(100),
@@ -141,17 +161,16 @@ class RightCategoryNav extends StatefulWidget{
   }
 
 }
+
 var smallCategoryIndex = 0;//小类索引
+
 class _RightCategoryNavState extends State<RightCategoryNav>{
-
-
 
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Container(
-      child: Provide<ChildCategory>(
+    return Provide<ChildCategory>(
         builder: (context,child,childCategory){
           return Container(
             height: ScreenUtil().setHeight(80),
@@ -171,8 +190,7 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
             ),
           );
         },
-      ),
-    );
+      );
   }
 
   Widget _rightInkWell(BxMallSubDto item,int index){
@@ -212,31 +230,54 @@ class CategoryGoodsList extends StatefulWidget{
 
 class _CategoryGoodsListState extends State<CategoryGoodsList>{
 
-  List<CategoryGoodsListData> mCategoryGoodsList;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    _getGoodList();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Container(
-      width: ScreenUtil().setWidth(570),
-      height: ScreenUtil().setHeight(950),
-      child: ListView.builder(
-        itemCount: mCategoryGoodsList.length,
-        itemBuilder: (context,index){
-          return _GoodList(index);
-        }
-      ),
+    return Provide<CategoryGoodsListProvide>(
+      builder: (context,child,data){
+        return Container(
+          width: ScreenUtil().setWidth(570),
+          height: ScreenUtil().setHeight(986),
+          child: ListView.builder(
+            itemCount: data.goodsList.length,
+              itemBuilder: (context,index){
+                return _ListWidget(data.goodsList, index);
+              }
+          ),
+        );
+      },
     );
   }
 
-  void _getGoodList()async{
+  Widget _ListWidget(List newList,int index){
+    return InkWell(
+      onTap: (){},
+      child: Container(
+        padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(width: 1.0,color: Colors.black12)
+          )
+        ),
+        child: Row(
+          children: <Widget>[
+            _goodsImage(newList,index),
+            Column(
+              children: <Widget>[
+                _goodsName(newList,index),
+                _goodsPrice(newList,index)
+              ],
+            )
+          ],
+        ),
+      ),
+
+    );
+  }
+
+  /*void _getGoodList()async{
     var data={
       'categoryId':'4',
       'categorySubId':"",
@@ -250,66 +291,41 @@ class _CategoryGoodsListState extends State<CategoryGoodsList>{
       });
       print('分类商品列表：>>>>>>>>>>>>>${mCategoryGoodsList[0].goodsName}'+'${mCategoryGoodsList.length}');
     });
-  }
+  }*/
 
-  Widget _goodsImage(index){
+  Widget _goodsImage(List newList,int index){
     return Container(
       width: ScreenUtil().setWidth(200),
-      child: Image.network(mCategoryGoodsList[index].image),
+      child: Image.network(newList[index].image),
     );
   }
 
-  Widget _goodsName(int index){
+  Widget _goodsName(List newList,int index){
     return Container(
       padding: EdgeInsets.only(top:5.0,bottom: 5.0),
       width: ScreenUtil().setWidth(370),
-      child: Text(mCategoryGoodsList[index].goodsName,maxLines: 2,overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: ScreenUtil().setSp(28))),
+      child: Text(newList[index].goodsName,maxLines: 2,overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: ScreenUtil().setSp(28))),
     );
   }
 
-  Widget _goodsPrice(int index){
+  Widget _goodsPrice(List newList,int index){
     return Container(
       margin: EdgeInsets.only(top:10.0),
       width: ScreenUtil().setWidth(370),
       child: Row(
         children: <Widget>[
           Text(
-            '价格：￥${mCategoryGoodsList[index].presentPrice}',
+            '价格：￥${newList[index].presentPrice}',
             style: TextStyle(color: Colors.pink,fontSize: ScreenUtil().setSp(30)),
           ),
           Text(
-            '${mCategoryGoodsList[index].oriPrice}',
+            '${newList[index].oriPrice}',
             style: TextStyle(color: Colors.black12,fontStyle: FontStyle.italic,decoration:TextDecoration.lineThrough,decorationColor: Colors.pink,fontSize: ScreenUtil().setSp(26)),
           )
         ],
       ),
     );
   }
-
-  Widget _GoodList(int index){
-    return InkWell(
-      onTap: (){},
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(bottom: BorderSide(color: Colors.black12,width: 1))
-        ),
-        child: Row(
-          children: <Widget>[
-            _goodsImage(index),
-            Column(
-              children: <Widget>[
-                _goodsName(index),
-                _goodsPrice(index)
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-
 
 }
 
