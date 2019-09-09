@@ -57,7 +57,7 @@ class LeftCategoryNav extends StatefulWidget{
 
 }
 
-var mChildList;//二级分类集合
+
 var mCategoryId;//大类分类的id
 var mCategorySubId;//小类分类的id
 var smallCategoryIndex = 0;//小类索引
@@ -94,7 +94,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
 
     bool isClick = false;
     isClick = (index == listIndex)?true:false;
-
+    var mChildList;//二级分类集合
     return InkWell(
       onTap: (){
         setState(() {
@@ -142,7 +142,12 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
     await request('getMallGoods',formData: data).then((val){
       var data = json.decode(val.toString());
       CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
-      Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+      if(goodsList.data==null){
+        Provide.value<CategoryGoodsListProvide>(context).getGoodsList([]);
+      }else{
+        Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+      }
+
     });
   }
 
@@ -218,7 +223,11 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
     await request('getMallGoods',formData: data).then((val){
       var data = json.decode(val.toString());
       CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
-      Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+      if(goodsList.data==null){
+        Provide.value<CategoryGoodsListProvide>(context).getGoodsList([]);
+      }else{
+        Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+      }
     });
   }
 
@@ -267,18 +276,28 @@ class _CategoryGoodsListState extends State<CategoryGoodsList>{
     // TODO: implement build
     return Provide<CategoryGoodsListProvide>(
       builder: (context,child,data){
-        return Expanded(
-            child:  Container(
-              width: ScreenUtil().setWidth(570),
+        if(data.goodsList.length>0){
+          return Expanded(
+              child:  Container(
+                width: ScreenUtil().setWidth(570),
 //              height: ScreenUtil().setHeight(986), 使用Expanded Widget,可以使子widget具有伸缩的能力
-              child: ListView.builder(
-                  itemCount: data.goodsList.length,
-                  itemBuilder: (context,index){
-                    return _ListWidget(data.goodsList, index);
-                  }
-              ),
-            )
-        );
+                child: ListView.builder(
+                    itemCount: data.goodsList.length,
+                    itemBuilder: (context,index){
+                      return _ListWidget(data.goodsList, index);
+                    }
+                ),
+              )
+          );
+        }else{
+          return Container(
+            alignment: Alignment.center,
+            width: ScreenUtil().setWidth(570),
+            height: ScreenUtil().setWidth(800),
+            child: Text('暂时没有数据',style:TextStyle(fontSize: ScreenUtil().setSp(28)))
+          );
+        }
+
 
       },
     );
