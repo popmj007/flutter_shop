@@ -8,6 +8,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../routers/application.dart';
 
 class HomePage extends StatefulWidget{
 
@@ -488,7 +489,10 @@ class _HotGoodsState  extends State<HotGoods>{
     if(hotGoodsList.length!=0){
       List<Widget> listWidget = hotGoodsList.map((val){
           return InkWell(
-            onTap: (){print("点击了商品");},
+            onTap: (){
+              print("点击了商品");
+              Application.router.navigateTo(context, "/detail?id=${val['goodsId']}");
+            },
             child:
             Container(
               width: ScreenUtil().setWidth(372),

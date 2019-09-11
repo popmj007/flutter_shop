@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop/pages/index_page.dart';
 import 'package:flutter_shop/provide/category_goods_list.dart';
 import 'package:flutter_shop/provide/child_category.dart';
+import 'package:flutter_shop/routers/routes.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/provide/counter.dart';
 import 'package:fluro/fluro.dart';
+import 'package:flutter_shop/routers/application.dart';
 
 
 void main(){
@@ -24,10 +26,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+    final router  = Router();
+    Routes.configureRoutes(router);
+    Application.router=router;
+
+
     return Container(
       child: MaterialApp(
         title: '百姓生活',
         debugShowCheckedModeBanner: false,
+        onGenerateRoute: Application.router.generator,
         theme: ThemeData(
           primaryColor: Colors.pink
         ),
