@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop/pages/index_page.dart';
 import 'package:flutter_shop/provide/category_goods_list.dart';
 import 'package:flutter_shop/provide/child_category.dart';
+import 'package:flutter_shop/provide/details_info.dart';
 import 'package:flutter_shop/routers/routes.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/provide/counter.dart';
@@ -16,9 +17,11 @@ void main(){
   var childCategory = ChildCategory();
   var counter = Counter();
   var categoryGoodsListProvide = CategoryGoodsListProvide();
+  var detailsInfoProvide = DetailsInfoProvide();
   providers..provide(Provider<ChildCategory>.value(childCategory))
   ..provide(Provider<Counter>.value(counter))
-  ..provide(Provider<CategoryGoodsListProvide>.value(categoryGoodsListProvide));
+  ..provide(Provider<CategoryGoodsListProvide>.value(categoryGoodsListProvide))
+  ..provide(Provider<DetailsInfoProvide>.value(detailsInfoProvide));
   runApp(ProviderNode(child: MyApp(), providers: providers));
 }
 
