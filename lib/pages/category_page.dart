@@ -8,6 +8,8 @@ import 'package:flutter_shop/model/CategoryBigModel.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/model/CategoryGoodsListModel.dart';
 import '../provide/category_goods_list.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CategoryPage extends StatefulWidget{
 
@@ -25,6 +27,17 @@ class CategoryPage extends StatefulWidget{
 class _CategoryPageState extends State<CategoryPage>{
   @override
   Widget build(BuildContext context) {
+
+    Fluttertoast.showToast(
+        msg: "This is Center Short Toast",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(title: Text('商品分类',style: TextStyle(color: Colors.white))),
@@ -113,7 +126,6 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
         });
 
 
-
         Provide.value<ChildCategory>(context).getChildCategory(mChildList);//状态管理给二级分类集合赋值
 
 
@@ -137,7 +149,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
     var data={
       'categoryId':categoryId==null?'4':categoryId,
       'categorySubId':categorySubId==null?'':categorySubId,
-      'page':1
+      'page':Provide.value<ChildCategory>(context).page
     };
     await request('getMallGoods',formData: data).then((val){
       var data = json.decode(val.toString());
@@ -146,6 +158,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav>{
         Provide.value<CategoryGoodsListProvide>(context).getGoodsList([]);
       }else{
         Provide.value<CategoryGoodsListProvide>(context).getGoodsList(goodsList.data);
+//        Provide.value<ChildCategory>(context).addPage();
       }
 
     });
@@ -218,7 +231,7 @@ class _RightCategoryNavState extends State<RightCategoryNav>{
     var data={
       'categoryId':categoryId==null?'4':categoryId,
       'categorySubId':categorySubId==null?'':categorySubId,
-      'page':1
+      'page':Provide.value<ChildCategory>(context).page
     };
     await request('getMallGoods',formData: data).then((val){
       var data = json.decode(val.toString());
@@ -268,11 +281,23 @@ class CategoryGoodsList extends StatefulWidget{
 
 }
 
+GlobalKey<RefreshFooterState> _footerkey = new GlobalKey();
+
 class _CategoryGoodsListState extends State<CategoryGoodsList>{
 
-
+  var scrollController=new ScrollController();
   @override
   Widget build(BuildContext context) {
+
+    try{
+      if(Provide.value<ChildCategory>(context).page==1){
+        scrollController.jumpTo(0.0);
+      }
+    }catch(e){
+      print('进入页面第一次初始化：${e}');
+    }
+
+
     // TODO: implement build
     return Provide<CategoryGoodsListProvide>(
       builder: (context,child,data){
@@ -281,11 +306,26 @@ class _CategoryGoodsListState extends State<CategoryGoodsList>{
               child:  Container(
                 width: ScreenUtil().setWidth(570),
 //              height: ScreenUtil().setHeight(986), 使用Expanded Widget,可以使子widget具有伸缩的能力
-                child: ListView.builder(
+                child: EasyRefresh(
+                    child: ListView.builder(
                     itemCount: data.goodsList.length,
+                    controller: scrollController,
                     itemBuilder: (context,index){
                       return _ListWidget(data.goodsList, index);
-                    }
+                    }),
+                  refreshFooter: ClassicsFooter(
+                    key: _footerkey,
+                    bgColor: Colors.white,
+                    textColor: Colors.pink,
+                    moreInfoColor: Colors.pink,
+                    showMore: true,
+                    noMoreText: Provide.value<ChildCategory>(context).noMoreText,
+                    moreInfo: '加载中',
+                    loadReadyText: '上拉加载',
+                  ),
+                  loadMore: ()async{
+                      print('没有更多了。。。');
+                  },
                 ),
               )
           );

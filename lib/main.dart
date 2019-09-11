@@ -6,6 +6,7 @@ import 'package:flutter_shop/provide/category_goods_list.dart';
 import 'package:flutter_shop/provide/child_category.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_shop/provide/counter.dart';
+import 'package:fluro/fluro.dart';
 
 
 void main(){
