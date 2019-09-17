@@ -13,8 +13,8 @@ class DetailsInfoProvide with ChangeNotifier{
 
     request('getGoodDetailById',formData:formData).then((val){
       var responseData = json.decode(val.toString());
-      print(responseData);
       goodsInfo = DetailsModel.fromJson(responseData);
+      print("商品詳情:"+goodsInfo.data.goodInfo.goodsName);
 
       notifyListeners();
 
