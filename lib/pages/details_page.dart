@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/pages/details_page/details_explain.dart';
 import 'package:flutter_shop/pages/details_page/details_top_area.dart';
 import 'package:flutter_shop/provide/details_info.dart';
 import 'package:provide/provide.dart';
@@ -33,12 +34,13 @@ class DetailsPage extends StatelessWidget {
               return Container(
                 child: Column(
                   children: <Widget>[
-                    DetailsTopArea()
+                    DetailsTopArea(),
+                    DetailsExplain()
                   ],
                 ),
               );
             } else {
-              return Text('加载中');
+              return Text('加载中。。');
             }
           }
       ),

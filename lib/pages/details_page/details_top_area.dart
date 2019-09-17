@@ -86,10 +86,10 @@ class DetailsTopArea extends StatelessWidget{
             ),
           ),
           Text(
-            '市场价：￥${oriPrice}',
+            '  市场价：￥${oriPrice}',
             style: TextStyle(
               color: Colors.black26,
-              decoration: TextDecoration.lineThrough
+              decoration: TextDecoration.lineThrough,
             ),
           )
         ],
