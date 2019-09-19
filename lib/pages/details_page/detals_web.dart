@@ -23,6 +23,7 @@ class DetailsWeb extends StatelessWidget{
           );
         }else{
           return Container(
+            alignment: Alignment.center,
             child: Text(
               '暂无详细数据',
               textAlign: TextAlign.center,
